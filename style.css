@@ -120,8 +120,8 @@ body::before {
 .profile { text-align: center; margin-bottom: 34px; perspective: 700px; }
 
 .share-button {
-  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-  min-width: 132px; min-height: 44px; margin-top: 15px; padding: 0 18px;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  width: fit-content; min-width: 132px; min-height: 44px; margin: 15px auto 0; padding: 0 18px;
   border: 1px solid rgba(196,181,253,.24); border-radius: 999px;
   background: rgba(20,20,27,.72); color: #ddd6fe;
   font: inherit; font-size: 13px; font-weight: 750; cursor: pointer;
