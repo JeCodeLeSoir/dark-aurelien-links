@@ -261,6 +261,7 @@ h1.title-active { filter: drop-shadow(0 8px 18px rgba(139,92,246,.28)); }
 .instagram { --card-color: #ec4899; }
 .tiktok { --card-color: #28ffff; }
 .github { --card-color: #a78bfa; }
+.kofi { --card-color: #ff5e5b; }
 .snapchat { --card-color: #fffc00; }
 
 .icon-wrap {
@@ -277,6 +278,7 @@ h1.title-active { filter: drop-shadow(0 8px 18px rgba(139,92,246,.28)); }
 
 .icon-wrap svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .icon-wrap .fill, .tiktok .icon-wrap svg, .github .icon-wrap svg { fill: currentColor; stroke: none; }
+.kofi .icon-wrap { color: #fff; background: #ff5e5b; box-shadow: 0 0 22px rgba(255,94,91,.2); }
 .snapchat .icon-wrap { color: #111; background: #fffc00; }
 
 .card-copy { z-index: 1; display: grid; gap: 4px; margin-left: 14px; }
@@ -421,7 +423,8 @@ body.iron-mode .custom-cursor { border-color: #fbbf24; box-shadow: 0 0 10px #f59
 .links .reveal:nth-child(2) { animation-delay: .07s; }
 .links .reveal:nth-child(3) { animation-delay: .14s; }
 .links .reveal:nth-child(4) { animation-delay: .21s; }
-.spotify-card.reveal { animation-delay: .28s; }
+.links .reveal:nth-child(5) { animation-delay: .28s; }
+.spotify-card.reveal { animation-delay: .35s; }
 
 @keyframes reveal { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes bounce { from { height: 22%; } to { height: 100%; } }
