@@ -313,3 +313,26 @@ if (finePointer.matches && profileTitle) {
     profileTitle.classList.remove("title-active");
   });
 }
+
+const visitorCount = document.querySelector("#visitor-count");
+
+async function loadVisitorCount() {
+  const workerEndpoint = window.POKE_CONFIG?.endpoint?.trim();
+  if (!visitorCount || !workerEndpoint) return;
+
+  try {
+    const response = await fetch(`${workerEndpoint.replace(/\/$/, "")}/visits`, {
+      method: "GET",
+      cache: "no-store"
+    });
+    const result = await response.json();
+    if (!response.ok || !Number.isSafeInteger(result.count) || result.count < 0) {
+      throw new Error("INVALID_VISITOR_COUNT");
+    }
+    visitorCount.textContent = `${result.count.toLocaleString("fr-FR")} visite${result.count > 1 ? "s" : ""}`;
+  } catch {
+    visitorCount.textContent = "Visites indisponibles";
+  }
+}
+
+loadVisitorCount();

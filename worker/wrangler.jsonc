@@ -6,6 +6,13 @@
   "vars": {
     "ALLOWED_ORIGINS": "http://127.0.0.1:8765,http://localhost:8765,https://jecodelesoir.github.io"
   },
+  "d1_databases": [
+    {
+      "binding": "VISITORS_DB",
+      "database_name": "dark-aurelien-visitors",
+      "database_id": "d2096f9c-d561-4fca-a12b-8eee8db332eb"
+    }
+  ],
   "ratelimits": [
     {
       "name": "POKE_RATE_LIMITER",
@@ -17,6 +24,6 @@
     }
   ],
   "secrets": {
-    "required": ["DISCORD_WEBHOOK_URL", "YOUTUBE_API_KEY", "TURNSTILE_SECRET_KEY"]
+    "required": ["DISCORD_WEBHOOK_URL", "YOUTUBE_API_KEY", "TURNSTILE_SECRET_KEY", "VISITOR_HASH_SALT"]
   }
 }

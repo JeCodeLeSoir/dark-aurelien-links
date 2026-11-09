@@ -1,5 +1,6 @@
 const JSON_HEADERS = { "Content-Type": "application/json; charset=utf-8" };
 const MAX_JSON_BYTES = 1000;
+const VISITOR_RETENTION_SECONDS = 30 * 24 * 60 * 60;
 const BASE_SECURITY_HEADERS = {
   "Cache-Control": "no-store",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
@@ -73,6 +74,40 @@ function allowedOrigin(request, env) {
   return allowed.includes(origin) ? origin : "";
 }
 
+async function hashVisitorIp(ip, salt) {
+  const bytes = new TextEncoder().encode(`${salt}:${ip}`);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function registerVisit(request, env) {
+  const ip = request.headers.get("CF-Connecting-IP");
+  if (!ip || !env.VISITOR_HASH_SALT) throw new Error("VISITOR_UNAVAILABLE");
+
+  const now = Math.floor(Date.now() / 1000);
+  const fingerprint = await hashVisitorIp(ip, env.VISITOR_HASH_SALT);
+  const inserted = await env.VISITORS_DB.prepare(
+    "INSERT OR IGNORE INTO visitors (fingerprint, first_seen, expires_at) VALUES (?, ?, ?)"
+  ).bind(fingerprint, now, now + VISITOR_RETENTION_SECONDS).run();
+
+  if (inserted.meta.changes === 1) {
+    await env.VISITORS_DB.prepare(
+      "UPDATE visitor_stats SET total = total + 1 WHERE id = 1"
+    ).run();
+  }
+
+  await env.VISITORS_DB.prepare("DELETE FROM visitors WHERE expires_at < ?")
+    .bind(now)
+    .run();
+
+  const stats = await env.VISITORS_DB.prepare(
+    "SELECT total FROM visitor_stats WHERE id = 1"
+  ).first();
+  return Number(stats?.total || 0);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -94,6 +129,19 @@ export default {
           ...BASE_SECURITY_HEADERS
         }
       });
+    }
+
+    if (url.pathname === "/visits") {
+      if (request.method !== "GET") {
+        return json({ error: "Méthode non autorisée." }, 405, origin);
+      }
+
+      try {
+        const count = await registerVisit(request, env);
+        return json({ count }, 200, origin);
+      } catch {
+        return json({ error: "Compteur momentanément indisponible." }, 503, origin);
+      }
     }
 
     if (url.pathname === "/youtube") {
