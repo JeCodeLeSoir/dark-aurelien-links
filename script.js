@@ -14,18 +14,48 @@ const snapCard = document.querySelector("#snapchat-card");
 const snapLabel = document.querySelector("#snap-label");
 const toast = document.querySelector("#toast");
 
+let toastTimer = 0;
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add("show");
+  window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => toast.classList.remove("show"), 1900);
+}
+
 snapCard.addEventListener("click", async () => {
   const username = snapCard.dataset.username;
   try {
     await navigator.clipboard.writeText(username);
     snapLabel.textContent = `${username} · copié !`;
-    toast.classList.add("show");
+    showToast("Identifiant copié");
     window.setTimeout(() => {
-      toast.classList.remove("show");
       snapLabel.textContent = `${username} · cliquer pour copier`;
     }, 1800);
   } catch {
     window.location.href = `https://www.snapchat.com/add/${username}`;
+  }
+});
+
+const shareButton = document.querySelector("#share-button");
+const publicSiteUrl = "https://jecodelesoir.github.io/dark-aurelien-links/";
+
+shareButton.addEventListener("click", async () => {
+  const shareData = {
+    title: "Dark Aurélien — Mes réseaux",
+    text: "Retrouve tous mes réseaux au même endroit.",
+    url: publicSiteUrl
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+      showToast("Lien partagé");
+    } else {
+      await navigator.clipboard.writeText(publicSiteUrl);
+      showToast("Lien copié");
+    }
+  } catch (error) {
+    if (error.name !== "AbortError") showToast("Partage indisponible");
   }
 });
 
@@ -291,6 +321,39 @@ if (finePointer.matches && customCursor) {
 }
 
 const profileTitle = document.querySelector("#profile-title");
+let titleActivations = 0;
+let titleActivationTimer = 0;
+
+function toggleIronMode() {
+  const enabled = document.body.classList.toggle("iron-mode");
+  document.querySelector('meta[name="theme-color"]').content = enabled ? "#330909" : "#07070a";
+  profileTitle.setAttribute("aria-pressed", String(enabled));
+  window.dispatchEvent(new CustomEvent("iron-mode-change", { detail: { enabled } }));
+  showToast(enabled ? "MODE IRON ACTIVÉ" : "Mode Iron désactivé");
+}
+
+function registerTitleActivation() {
+  if (document.body.classList.contains("iron-mode")) {
+    toggleIronMode();
+    return;
+  }
+
+  titleActivations += 1;
+  window.clearTimeout(titleActivationTimer);
+  titleActivationTimer = window.setTimeout(() => { titleActivations = 0; }, 6000);
+  if (titleActivations >= 5) {
+    titleActivations = 0;
+    toggleIronMode();
+  }
+}
+
+profileTitle.addEventListener("click", registerTitleActivation);
+profileTitle.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    registerTitleActivation();
+  }
+});
 
 if (finePointer.matches && profileTitle) {
   profileTitle.addEventListener("pointermove", (event) => {

@@ -21,7 +21,8 @@ try {
   const uniforms = {
     uTime: { value: 0 },
     uResolution: { value: new THREE.Vector2() },
-    uPointer: { value: pointer }
+    uPointer: { value: pointer },
+    uIron: { value: 0 }
   };
 
   const material = new THREE.ShaderMaterial({
@@ -39,6 +40,7 @@ try {
       uniform float uTime;
       uniform vec2 uResolution;
       uniform vec2 uPointer;
+      uniform float uIron;
 
       float blob(vec2 uv, vec2 center, float radius) {
         float d = length(uv - center);
@@ -72,6 +74,12 @@ try {
         vec3 color = mix(purple, pink, clamp(uv.x * 0.75 + uv.y * 0.25, 0.0, 1.0));
         color = mix(color, violet, inner * 0.55);
         color += rim * vec3(0.38, 0.18, 0.62);
+
+        vec3 ironRed = vec3(0.86, 0.04, 0.025);
+        vec3 ironGold = vec3(1.0, 0.58, 0.04);
+        vec3 ironGlow = mix(ironRed, ironGold, clamp(uv.x + rim * 0.5, 0.0, 1.0));
+        ironGlow += inner * vec3(0.05, 0.48, 0.62);
+        color = mix(color, ironGlow, uIron);
 
         float edgeFade = smoothstep(0.0, 0.18, uv.y) * smoothstep(0.0, 0.12, 1.0 - uv.y);
         float alpha = (liquid * 0.18 + rim * 0.26 + inner * 0.08) * edgeFade;
@@ -116,6 +124,10 @@ try {
   restart();
   window.addEventListener("resize", resize, { passive: true });
   window.addEventListener("pointermove", updatePointer, { passive: true });
+  window.addEventListener("iron-mode-change", (event) => {
+    uniforms.uIron.value = event.detail?.enabled ? 1 : 0;
+    render();
+  });
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && !reduceMotion.matches) restart();
   });

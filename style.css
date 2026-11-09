@@ -119,6 +119,19 @@ body::before {
 
 .profile { text-align: center; margin-bottom: 34px; perspective: 700px; }
 
+.share-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  min-width: 132px; min-height: 44px; margin-top: 15px; padding: 0 18px;
+  border: 1px solid rgba(196,181,253,.24); border-radius: 999px;
+  background: rgba(20,20,27,.72); color: #ddd6fe;
+  font: inherit; font-size: 13px; font-weight: 750; cursor: pointer;
+  box-shadow: 0 10px 32px rgba(0,0,0,.24);
+  transition: transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+.share-button svg { width: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.share-button:hover { transform: translateY(-2px); border-color: rgba(196,181,253,.55); background: rgba(139,92,246,.14); box-shadow: 0 12px 34px rgba(139,92,246,.16); }
+.share-button:focus-visible { outline: 3px solid #c4b5fd; outline-offset: 4px; }
+
 .avatar {
   --profile-angle: 0deg;
   width: 88px;
@@ -361,6 +374,25 @@ h1.title-active { filter: drop-shadow(0 8px 18px rgba(139,92,246,.28)); }
 .youtube-player iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 
 footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 34px; color: #686875; font-size: 12px; font-weight: 600; }
+.armor-hud { position: fixed; inset: 0; z-index: 8; opacity: 0; pointer-events: none; transition: opacity .45s ease; }
+.armor-corner { position: absolute; width: 86px; height: 86px; border-color: rgba(255,185,55,.78); filter: drop-shadow(0 0 9px rgba(255,70,20,.7)); }
+.armor-corner-tl { top: 18px; left: 18px; border-top: 2px solid; border-left: 2px solid; clip-path: polygon(0 0,100% 0,100% 10%,22% 10%,10% 22%,10% 100%,0 100%); }
+.armor-corner-tr { top: 18px; right: 18px; border-top: 2px solid; border-right: 2px solid; clip-path: polygon(0 0,100% 0,100% 100%,90% 100%,90% 22%,78% 10%,0 10%); }
+.armor-corner-bl { bottom: 18px; left: 18px; border-bottom: 2px solid; border-left: 2px solid; clip-path: polygon(0 0,10% 0,10% 78%,22% 90%,100% 90%,100% 100%,0 100%); }
+.armor-corner-br { right: 18px; bottom: 18px; border-right: 2px solid; border-bottom: 2px solid; clip-path: polygon(90% 0,100% 0,100% 100%,0 100%,0 90%,78% 90%,90% 78%); }
+.armor-reactor { position: absolute; top: 22px; left: 50%; width: 52px; height: 52px; border: 2px solid #ffd166; border-radius: 50%; background: radial-gradient(circle, #fff 0 10%, #67e8f9 11% 24%, #fbbf24 25% 28%, transparent 30%); box-shadow: 0 0 12px #67e8f9, 0 0 34px rgba(251,191,36,.85), inset 0 0 13px #fff; transform: translateX(-50%); }
+.armor-reactor::before, .armor-reactor::after { content: ""; position: absolute; inset: 7px; border: 1px dashed rgba(255,255,255,.8); border-radius: 50%; }
+.armor-reactor::after { inset: -10px; border-color: rgba(251,191,36,.58); }
+.armor-status { position: absolute; top: 86px; left: 50%; color: #fbbf24; font-size: 9px; font-weight: 800; letter-spacing: .22em; text-shadow: 0 0 9px rgba(255,80,20,.85); transform: translateX(-50%); white-space: nowrap; }
+body.iron-mode { --purple: #dc2626; --pink: #f59e0b; }
+body.iron-mode .armor-hud { opacity: 1; }
+body.iron-mode::after { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(circle at 50% 16%, rgba(103,232,249,.13), transparent 19%), linear-gradient(115deg, rgba(127,29,29,.12), transparent 32%, rgba(245,158,11,.09)); }
+body.iron-mode .avatar { background: conic-gradient(from var(--profile-angle), #fbbf24, #dc2626, #67e8f9, #fbbf24); box-shadow: 0 0 22px rgba(251,191,36,.72), 0 0 45px rgba(220,38,38,.38); }
+body.iron-mode h1 span { color: #fbbf24; }
+body.iron-mode h1::after { background-image: radial-gradient(circle 115px at var(--title-x) var(--title-y), #fff 0%, #67e8f9 22%, #fbbf24 48%, transparent 72%); }
+body.iron-mode .social-card, body.iron-mode .poke-card, body.iron-mode .spotify-card { border-color: rgba(251,191,36,.3); box-shadow: 0 18px 55px rgba(127,29,29,.2), inset 0 0 22px rgba(245,158,11,.035); }
+body.iron-mode .share-button { color: #ffd166; border-color: rgba(251,191,36,.58); background: rgba(127,29,29,.35); box-shadow: 0 0 22px rgba(220,38,38,.3); }
+body.iron-mode .custom-cursor { border-color: #fbbf24; box-shadow: 0 0 10px #f59e0b, 0 0 26px rgba(220,38,38,.8), inset 0 0 10px #67e8f9; }
 .toast { position: fixed; left: 50%; bottom: 24px; z-index: 10; padding: 12px 18px; border: 1px solid var(--border); border-radius: 99px; background: #f7f7fa; color: #101014; font-size: 13px; font-weight: 700; opacity: 0; pointer-events: none; transform: translate(-50%, 20px); transition: opacity .2s ease, transform .2s ease; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .reveal { animation: reveal .55s both; }
@@ -386,3 +418,12 @@ footer { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; mar
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  body.iron-mode .armor-reactor::before { animation: hud-spin 5s linear infinite; }
+  body.iron-mode .armor-reactor::after { animation: hud-spin 9s linear reverse infinite; }
+  body.iron-mode .armor-hud { animation: hud-pulse 2.6s ease-in-out infinite alternate; }
+}
+
+@keyframes hud-spin { to { transform: rotate(360deg); } }
+@keyframes hud-pulse { from { filter: brightness(.9); } to { filter: brightness(1.18); } }
