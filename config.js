@@ -8,5 +8,6 @@ window.MUSIC_CONFIG = {
 
 // Colle ici l'URL de ton Worker après son déploiement.
 window.POKE_CONFIG = {
-  endpoint: "https://dark-aurelien-poke.dark-aurelien-poke-worker.workers.dev"
+  endpoint: "https://dark-aurelien-poke.dark-aurelien-poke-worker.workers.dev",
+  turnstileSiteKey: "0x4AAAAAAF5vf-vpEwp1qWvS"
 };

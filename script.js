@@ -1,6 +1,15 @@
 const spotifyProfile = "https://open.spotify.com/user/312d4xhikcxopuz43wpksnzkidtu?si=f4c9bb6df4f74379";
 const musicConfig = window.MUSIC_CONFIG || {};
 
+function trustedExternalUrl(value, allowedHosts, fallback) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && allowedHosts.has(url.hostname) ? url.href : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 const snapCard = document.querySelector("#snapchat-card");
 const snapLabel = document.querySelector("#snap-label");
 const toast = document.querySelector("#toast");
@@ -30,7 +39,11 @@ function setTrack(track) {
   document.querySelector("#spotify-note").textContent = isPlaying
     ? "Actualisé automatiquement toutes les 30 secondes via Last.fm."
     : "Dernier titre écouté · actualisé via Last.fm.";
-  trackLink.href = track.url || spotifyProfile;
+  trackLink.href = trustedExternalUrl(
+    track.url,
+    new Set(["www.last.fm", "last.fm"]),
+    spotifyProfile
+  );
 
   if (image) {
     const cover = document.createElement("img");
@@ -40,7 +53,10 @@ function setTrack(track) {
   }
 
   const livePill = document.querySelector("#live-pill");
-  livePill.innerHTML = `<span></span> ${isPlaying ? "EN DIRECT" : "DERNIÈRE ÉCOUTE"}`;
+  livePill.replaceChildren(
+    document.createElement("span"),
+    document.createTextNode(` ${isPlaying ? "EN DIRECT" : "DERNIÈRE ÉCOUTE"}`)
+  );
   livePill.classList.toggle("is-live", isPlaying);
   document.querySelector("#equalizer").classList.toggle("is-playing", isPlaying);
   prepareYouTube(track);
@@ -85,7 +101,9 @@ document.querySelector("#youtube-listen").addEventListener("click", () => {
   const origin = encodeURIComponent(window.location.origin);
   iframe.src = `https://www.youtube.com/embed/${encodeURIComponent(currentYouTubeId)}?playsinline=1&origin=${origin}`;
   iframe.title = "Lecteur YouTube du morceau en cours";
-  iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+  iframe.allow = "autoplay; encrypted-media; picture-in-picture";
+  iframe.referrerPolicy = "strict-origin-when-cross-origin";
+  iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-presentation allow-popups");
   iframe.allowFullscreen = true;
   player.replaceChildren(iframe);
   player.hidden = false;
@@ -126,6 +144,40 @@ const pokeButtonLabel = pokeButton.querySelector("span");
 const POKE_COOLDOWN_MS = 60_000;
 const POKE_COOLDOWN_KEY = "dark-aurelien-poke-cooldown";
 let pokeCooldownTimer = 0;
+let turnstileWidgetId = null;
+let turnstileToken = "";
+
+function initializeTurnstile(attempt = 0) {
+  const sitekey = window.POKE_CONFIG?.turnstileSiteKey?.trim();
+  if (!sitekey || sitekey === "TURNSTILE_SITE_KEY") {
+    pokeButton.disabled = true;
+    setPokeStatus("La protection anti-robot n’est pas encore configurée.", "error");
+    return;
+  }
+
+  if (!window.turnstile) {
+    if (attempt < 40) window.setTimeout(() => initializeTurnstile(attempt + 1), 250);
+    else setPokeStatus("La protection anti-robot n’a pas pu charger.", "error");
+    return;
+  }
+
+  turnstileWidgetId = window.turnstile.render("#turnstile-wrap", {
+    sitekey,
+    theme: "dark",
+    size: "flexible",
+    callback(token) {
+      turnstileToken = token;
+      updatePokeCooldown();
+    },
+    "expired-callback"() {
+      turnstileToken = "";
+    },
+    "error-callback"() {
+      turnstileToken = "";
+      setPokeStatus("La vérification anti-robot a échoué.", "error");
+    }
+  });
+}
 
 function setPokeStatus(message, type = "") {
   pokeStatus.textContent = message;
@@ -171,6 +223,11 @@ pokeForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  if (!turnstileToken) {
+    setPokeStatus("Valide d’abord la vérification anti-robot.", "error");
+    return;
+  }
+
   pokeButton.disabled = true;
   setPokeStatus("Envoi du poke…");
 
@@ -178,7 +235,7 @@ pokeForm.addEventListener("submit", async (event) => {
     const response = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, website })
+      body: JSON.stringify({ name, website, turnstileToken })
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.error || "Impossible d’envoyer le poke.");
@@ -190,11 +247,14 @@ pokeForm.addEventListener("submit", async (event) => {
   } catch (error) {
     setPokeStatus(error.message || "Une erreur est survenue.", "error");
   } finally {
+    turnstileToken = "";
+    if (window.turnstile && turnstileWidgetId !== null) window.turnstile.reset(turnstileWidgetId);
     updatePokeCooldown();
   }
 });
 
 updatePokeCooldown();
+initializeTurnstile();
 
 const customCursor = document.querySelector("#custom-cursor");
 const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");

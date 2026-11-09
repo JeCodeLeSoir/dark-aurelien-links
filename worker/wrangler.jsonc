@@ -17,6 +17,6 @@
     }
   ],
   "secrets": {
-    "required": ["DISCORD_WEBHOOK_URL", "YOUTUBE_API_KEY"]
+    "required": ["DISCORD_WEBHOOK_URL", "YOUTUBE_API_KEY", "TURNSTILE_SECRET_KEY"]
   }
 }

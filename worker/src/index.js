@@ -1,15 +1,65 @@
 const JSON_HEADERS = { "Content-Type": "application/json; charset=utf-8" };
+const MAX_JSON_BYTES = 1000;
+const BASE_SECURITY_HEADERS = {
+  "Cache-Control": "no-store",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+  "Referrer-Policy": "no-referrer",
+  "X-Content-Type-Options": "nosniff"
+};
+
+async function readJsonWithLimit(request, maxBytes = MAX_JSON_BYTES) {
+  if (!request.body) throw new Error("INVALID_JSON");
+
+  const reader = request.body.getReader();
+  const decoder = new TextDecoder();
+  let bytes = 0;
+  let text = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    bytes += value.byteLength;
+    if (bytes > maxBytes) {
+      await reader.cancel();
+      throw new Error("BODY_TOO_LARGE");
+    }
+    text += decoder.decode(value, { stream: true });
+  }
+
+  text += decoder.decode();
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error("INVALID_JSON");
+  }
+}
+
+async function verifyTurnstile(token, ip, secret) {
+  if (!token || !secret) return false;
+  const form = new FormData();
+  form.set("secret", secret);
+  form.set("response", token);
+  if (ip && ip !== "unknown") form.set("remoteip", ip);
+
+  const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    body: form
+  });
+  if (!response.ok) return false;
+  const result = await response.json();
+  return result.success === true;
+}
 
 function json(data, status, origin) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       ...JSON_HEADERS,
+      ...BASE_SECURITY_HEADERS,
       "Access-Control-Allow-Origin": origin,
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
-      "Vary": "Origin",
-      "X-Content-Type-Options": "nosniff"
+      "Vary": "Origin"
     }
   });
 }
@@ -29,7 +79,7 @@ export default {
     const origin = allowedOrigin(request, env);
 
     if (!origin) {
-      return new Response("Origine refusée", { status: 403 });
+      return new Response("Origine refusée", { status: 403, headers: BASE_SECURITY_HEADERS });
     }
 
     if (request.method === "OPTIONS") {
@@ -40,7 +90,8 @@ export default {
           "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type",
           "Access-Control-Max-Age": "86400",
-          "Vary": "Origin"
+          "Vary": "Origin",
+          ...BASE_SECURITY_HEADERS
         }
       });
     }
@@ -107,11 +158,6 @@ export default {
       return json({ error: "Format invalide." }, 415, origin);
     }
 
-    const contentLength = Number(request.headers.get("Content-Length") || 0);
-    if (contentLength > 1000) {
-      return json({ error: "Requête trop volumineuse." }, 413, origin);
-    }
-
     const ip = request.headers.get("CF-Connecting-IP") || "unknown";
     const rateLimit = await env.POKE_RATE_LIMITER.limit({ key: ip });
     if (!rateLimit.success) {
@@ -120,8 +166,11 @@ export default {
 
     let body;
     try {
-      body = await request.json();
-    } catch {
+      body = await readJsonWithLimit(request);
+    } catch (error) {
+      if (error.message === "BODY_TOO_LARGE") {
+        return json({ error: "Requête trop volumineuse." }, 413, origin);
+      }
       return json({ error: "JSON invalide." }, 400, origin);
     }
 
@@ -137,6 +186,11 @@ export default {
 
     if (!/^[\p{L}\p{N} @._'’\-]+$/u.test(name)) {
       return json({ error: "Ce nom contient des caractères non autorisés." }, 400, origin);
+    }
+
+    const turnstileToken = typeof body.turnstileToken === "string" ? body.turnstileToken : "";
+    if (!(await verifyTurnstile(turnstileToken, ip, env.TURNSTILE_SECRET_KEY))) {
+      return json({ error: "Vérification anti-robot invalide." }, 403, origin);
     }
 
     const discordResponse = await fetch(env.DISCORD_WEBHOOK_URL, {
