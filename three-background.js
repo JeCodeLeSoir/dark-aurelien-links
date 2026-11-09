@@ -1,4 +1,4 @@
-import * as THREE from "./vendor/three.module.min.js";
+import * as THREE from "./vendor/three.module.js";
 
 const host = document.querySelector("#liquid-background");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
