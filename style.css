@@ -360,39 +360,6 @@ h1.title-active { filter: drop-shadow(0 8px 18px rgba(139,92,246,.28)); }
 .youtube-player[hidden] { display: none; }
 .youtube-player iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 
-.instagram-post-card {
-  margin-top: 18px;
-  padding: 20px;
-  border: 1px solid rgba(236, 72, 153, .28);
-  border-radius: 24px;
-  background: linear-gradient(145deg, rgba(236, 72, 153, .11), rgba(139, 92, 246, .08) 38%, rgba(20, 20, 27, .84) 72%);
-  box-shadow: 0 26px 80px rgba(0,0,0,.3);
-}
-.instagram-post-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 17px; }
-.instagram-post-label { color: #f472b6; font-size: 10px; font-weight: 800; letter-spacing: .14em; }
-.instagram-post-heading h2 { margin: 3px 0 0; font-size: 18px; }
-.instagram-post-heading a { display: flex; align-items: center; gap: 7px; color: #f9a8d4; font-size: 12px; font-weight: 700; text-decoration: none; }
-.instagram-post-heading a:hover { color: #fff; }
-.instagram-post-heading a:focus-visible { outline: 3px solid #f472b6; outline-offset: 4px; border-radius: 4px; }
-.instagram-post-heading svg { width: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s ease; }
-.instagram-post-heading a:hover svg { transform: translateX(3px); }
-.instagram-embed-wrap {
-  width: 100%;
-  overflow: hidden;
-  border: 2px solid rgba(236, 72, 153, .42);
-  border-radius: 16px;
-  background: #09090d;
-  box-shadow: 0 0 24px rgba(168, 85, 247, .14), inset 0 0 0 1px rgba(255, 255, 255, .04);
-}
-.instagram-embed-wrap iframe {
-  display: block;
-  width: 100%;
-  height: 690px;
-  border: 0;
-  background: #09090d;
-  color-scheme: dark;
-}
-
 footer { display: flex; justify-content: center; gap: 10px; margin-top: 34px; color: #686875; font-size: 12px; font-weight: 600; }
 .toast { position: fixed; left: 50%; bottom: 24px; z-index: 10; padding: 12px 18px; border: 1px solid var(--border); border-radius: 99px; background: #f7f7fa; color: #101014; font-size: 13px; font-weight: 700; opacity: 0; pointer-events: none; transform: translate(-50%, 20px); transition: opacity .2s ease, transform .2s ease; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
@@ -410,10 +377,7 @@ footer { display: flex; justify-content: center; gap: 10px; margin-top: 34px; co
   .page-shell { width: min(100% - 24px, 590px); padding-top: 36px; }
   .profile { margin-bottom: 27px; }
   .social-card { min-height: 72px; border-radius: 18px; }
-  .spotify-card, .poke-card, .instagram-post-card { padding: 17px; }
-  .instagram-post-heading { align-items: flex-start; }
-  .instagram-post-heading a { max-width: 105px; text-align: right; }
-  .instagram-embed-wrap iframe { height: 620px; }
+  .spotify-card, .poke-card { padding: 17px; }
   .poke-row { align-items: stretch; }
   .poke-row button { min-width: 92px; }
   .live-pill { font-size: 9px; }
