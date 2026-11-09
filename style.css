@@ -184,6 +184,9 @@ h1 {
   letter-spacing: -.07em;
   transform-style: preserve-3d;
   transition: transform .16s ease-out, filter .2s ease;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
   will-change: transform;
 }
 h1 span { color: var(--purple); }
