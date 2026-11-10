@@ -12,9 +12,10 @@ function configureMobileAppLinks() {
     if (!isAndroid) return;
 
     const fallback = link.href;
-    const url = new URL(fallback);
+    const url = new URL(link.dataset.androidDeepLink || fallback);
     const packageName = link.dataset.androidPackage;
-    link.href = `intent://${url.host}${url.pathname}${url.search}#Intent;scheme=https;package=${packageName};S.browser_fallback_url=${encodeURIComponent(fallback)};end`;
+    const scheme = url.protocol.slice(0, -1);
+    link.href = `intent://${url.host}${url.pathname}${url.search}#Intent;scheme=${scheme};package=${packageName};S.browser_fallback_url=${encodeURIComponent(fallback)};end`;
   });
 }
 
