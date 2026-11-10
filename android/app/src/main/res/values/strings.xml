@@ -19,6 +19,9 @@
     <string name="monitor_text">Vérification sécurisée en cours</string>
     <string name="poke_title">Nouveau poke</string>
     <string name="poke_text">%1$s vient de t’envoyer un poke</string>
+    <string name="visit_title">Nouvelle visite</string>
+    <string name="visit_text">Quelqu’un vient de visiter ton site</string>
+    <string name="visit_history">Visite du site</string>
     <string name="history_title">Historique</string>
     <string name="history_empty">Aucun poke reçu pour le moment.</string>
     <string name="history_clear">Effacer l’historique</string>

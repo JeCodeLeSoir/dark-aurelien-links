@@ -124,12 +124,13 @@ async function getPokeNotifications(request, env, url) {
     .bind(now)
     .run();
   const result = await env.VISITORS_DB.prepare(
-    "SELECT id, name, created_at FROM poke_notifications WHERE id > ? AND expires_at >= ? ORDER BY id ASC LIMIT 50"
+    "SELECT id, kind, name, created_at FROM poke_notifications WHERE id > ? AND expires_at >= ? ORDER BY id ASC LIMIT 50"
   ).bind(after, now).all();
 
   return privateJson({
     notifications: (result.results || []).map((row) => ({
       id: Number(row.id),
+      kind: row.kind === "visit" ? "visit" : "poke",
       name: String(row.name),
       createdAt: Number(row.created_at)
     }))
@@ -167,6 +168,9 @@ async function registerVisit(request, env) {
     await env.VISITORS_DB.prepare(
       "UPDATE visitor_stats SET total = total + 1 WHERE id = 1"
     ).run();
+    await env.VISITORS_DB.prepare(
+      "INSERT INTO poke_notifications (kind, name, created_at, expires_at) VALUES ('visit', 'Visite', ?, ?)"
+    ).bind(now, now + POKE_RETENTION_SECONDS).run();
   }
 
   await env.VISITORS_DB.prepare("DELETE FROM visitors WHERE expires_at < ?")
@@ -358,7 +362,7 @@ export default {
     const now = Math.floor(Date.now() / 1000);
     try {
       await env.VISITORS_DB.prepare(
-        "INSERT INTO poke_notifications (name, created_at, expires_at) VALUES (?, ?, ?)"
+        "INSERT INTO poke_notifications (kind, name, created_at, expires_at) VALUES ('poke', ?, ?, ?)"
       ).bind(name, now, now + POKE_RETENTION_SECONDS).run();
     } catch (error) {
       // Discord a déjà reçu le poke : ne pas provoquer un nouvel envoi par retry.

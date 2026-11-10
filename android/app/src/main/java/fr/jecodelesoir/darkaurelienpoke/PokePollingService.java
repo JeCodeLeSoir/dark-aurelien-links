@@ -111,12 +111,14 @@ public final class PokePollingService extends Service {
                 JSONObject event = notifications.optJSONObject(index);
                 if (event == null) continue;
                 long id = event.optLong("id", -1L);
+                String kind = "visit".equals(event.optString("kind", "poke")) ? "visit" : "poke";
                 String name = event.optString("name", "").trim();
-                if (id <= newest || name.length() < 2 || name.length() > 32) continue;
-                PokeHistoryStore.add(this, id, name, event.optLong("createdAt", System.currentTimeMillis() / 1000L));
+                if (id <= newest || ("poke".equals(kind) && (name.length() < 2 || name.length() > 32))) continue;
+                PokeHistoryStore.add(this, id, kind, name,
+                        event.optLong("createdAt", System.currentTimeMillis() / 1000L));
                 sendBroadcast(new Intent(ACTION_HISTORY_CHANGED).setPackage(getPackageName()),
                         "fr.jecodelesoir.darkaurelienpoke.permission.INTERNAL");
-                showPoke(id, name);
+                showEvent(id, kind, name);
                 newest = id;
                 getSharedPreferences(PREFS, MODE_PRIVATE).edit().putLong(LAST_SEEN, newest).apply();
             }
@@ -180,12 +182,15 @@ public final class PokePollingService extends Service {
                 .build();
     }
 
-    private void showPoke(long id, String name) {
+    private void showEvent(long id, String kind, String name) {
+        boolean visit = "visit".equals(kind);
+        String title = getString(visit ? R.string.visit_title : R.string.poke_title);
+        String text = visit ? getString(R.string.visit_text) : getString(R.string.poke_text, name);
         Notification notification = new Notification.Builder(this, POKE_CHANNEL)
                 .setSmallIcon(R.drawable.ic_app)
-                .setContentTitle(getString(R.string.poke_title))
-                .setContentText(getString(R.string.poke_text, name))
-                .setStyle(new Notification.BigTextStyle().bigText(getString(R.string.poke_text, name)))
+                .setContentTitle(title)
+                .setContentText(text)
+                .setStyle(new Notification.BigTextStyle().bigText(text))
                 .setContentIntent(openAppIntent())
                 .setAutoCancel(true)
                 .setCategory(Notification.CATEGORY_MESSAGE)

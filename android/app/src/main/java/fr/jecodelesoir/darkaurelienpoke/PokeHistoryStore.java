@@ -22,10 +22,11 @@ import javax.crypto.spec.GCMParameterSpec;
 final class PokeHistoryStore {
     static final class Entry {
         final long id;
+        final String kind;
         final String name;
         final long createdAt;
-        Entry(long id, String name, long createdAt) {
-            this.id = id; this.name = name; this.createdAt = createdAt;
+        Entry(long id, String kind, String name, long createdAt) {
+            this.id = id; this.kind = kind; this.name = name; this.createdAt = createdAt;
         }
     }
 
@@ -38,10 +39,10 @@ final class PokeHistoryStore {
 
     private PokeHistoryStore() {}
 
-    static synchronized void add(Context context, long id, String name, long createdAt) {
+    static synchronized void add(Context context, long id, String kind, String name, long createdAt) {
         List<Entry> entries = load(context);
         for (Entry entry : entries) if (entry.id == id) return;
-        entries.add(0, new Entry(id, name, createdAt));
+        entries.add(0, new Entry(id, kind, name, createdAt));
         save(context, entries);
     }
 
@@ -64,8 +65,10 @@ final class PokeHistoryStore {
                 long id = item.optLong("id", -1);
                 long createdAt = item.optLong("createdAt", 0);
                 String name = item.optString("name", "").trim();
-                if (id > 0 && createdAt >= cutoff && name.length() >= 2 && name.length() <= 32) {
-                    result.add(new Entry(id, name, createdAt));
+                String kind = "visit".equals(item.optString("kind", "poke")) ? "visit" : "poke";
+                boolean validName = "visit".equals(kind) || (name.length() >= 2 && name.length() <= 32);
+                if (id > 0 && createdAt >= cutoff && validName) {
+                    result.add(new Entry(id, kind, name, createdAt));
                 }
             }
         } catch (Exception error) {
@@ -85,7 +88,8 @@ final class PokeHistoryStore {
             for (Entry entry : entries) {
                 if (array.length() >= MAX_ENTRIES) break;
                 if (entry.createdAt < cutoff) continue;
-                array.put(new JSONObject().put("id", entry.id).put("name", entry.name).put("createdAt", entry.createdAt));
+                array.put(new JSONObject().put("id", entry.id).put("kind", entry.kind)
+                        .put("name", entry.name).put("createdAt", entry.createdAt));
             }
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
             cipher.init(Cipher.ENCRYPT_MODE, getOrCreateKey());

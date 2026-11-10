@@ -197,7 +197,7 @@ public final class MainActivity extends Activity {
             card.setLayoutParams(params);
 
             TextView name = new TextView(this);
-            name.setText(entry.name);
+            name.setText("visit".equals(entry.kind) ? getString(R.string.visit_history) : entry.name);
             name.setTextColor(getColor(R.color.text_primary));
             name.setTextSize(17);
             name.setTypeface(name.getTypeface(), android.graphics.Typeface.BOLD);
