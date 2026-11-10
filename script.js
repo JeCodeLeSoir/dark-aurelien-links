@@ -89,56 +89,7 @@ function setTrack(track) {
   );
   livePill.classList.toggle("is-live", isPlaying);
   document.querySelector("#equalizer").classList.toggle("is-playing", isPlaying);
-  prepareYouTube(track);
 }
-
-let currentYouTubeId = "";
-let currentYouTubeQuery = "";
-
-async function prepareYouTube(track) {
-  const workerEndpoint = window.POKE_CONFIG?.endpoint?.trim();
-  const button = document.querySelector("#youtube-listen");
-  const player = document.querySelector("#youtube-player");
-  const artist = track.artist?.["#text"] || "";
-  const title = track.name || "";
-  const query = `${artist} ${title}`.trim();
-  if (!workerEndpoint || !query || query === currentYouTubeQuery) return;
-
-  currentYouTubeQuery = query;
-  currentYouTubeId = "";
-  button.hidden = true;
-  player.hidden = true;
-  player.replaceChildren();
-
-  try {
-    const base = workerEndpoint.replace(/\/$/, "");
-    const response = await fetch(`${base}/youtube?q=${encodeURIComponent(query)}`);
-    if (!response.ok) return;
-    const result = await response.json();
-    if (result.videoId) {
-      currentYouTubeId = result.videoId;
-      button.hidden = false;
-    }
-  } catch (error) {
-    console.warn("Recherche YouTube indisponible :", error);
-  }
-}
-
-document.querySelector("#youtube-listen").addEventListener("click", () => {
-  if (!currentYouTubeId) return;
-  const player = document.querySelector("#youtube-player");
-  const iframe = document.createElement("iframe");
-  const origin = encodeURIComponent(window.location.origin);
-  iframe.src = `https://www.youtube.com/embed/${encodeURIComponent(currentYouTubeId)}?playsinline=1&origin=${origin}`;
-  iframe.title = "Lecteur YouTube du morceau en cours";
-  iframe.allow = "autoplay; encrypted-media; picture-in-picture";
-  iframe.referrerPolicy = "strict-origin-when-cross-origin";
-  iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-presentation allow-popups");
-  iframe.allowFullscreen = true;
-  player.replaceChildren(iframe);
-  player.hidden = false;
-  document.querySelector("#youtube-listen").hidden = true;
-});
 
 async function refreshLastFm() {
   const { lastfmUsername, lastfmApiKey } = musicConfig;
