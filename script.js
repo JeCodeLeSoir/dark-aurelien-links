@@ -1,18 +1,25 @@
-const spotifyProfile = "https://open.spotify.com/user/312d4xhikcxopuz43wpksnzkidtu?si=f4c9bb6df4f74379";
 const workerEndpoint = "https://dark-aurelien-poke.dark-aurelien-poke-worker.workers.dev";
 const turnstileSiteKey = "0x4AAAAAAF5vf-vpEwp1qWvS";
 
-function trustedExternalUrl(value, allowedHosts, fallback) {
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" && allowedHosts.has(url.hostname) ? url.href : fallback;
-  } catch {
-    return fallback;
-  }
+function configureMobileAppLinks() {
+  const userAgent = navigator.userAgent || "";
+  const isAndroid = /Android/i.test(userAgent);
+  const isMobileApple = /iPhone|iPad|iPod/i.test(userAgent);
+  if (!isAndroid && !isMobileApple) return;
+
+  document.querySelectorAll("a[data-android-package]").forEach((link) => {
+    link.removeAttribute("target");
+    if (!isAndroid) return;
+
+    const fallback = link.href;
+    const url = new URL(fallback);
+    const packageName = link.dataset.androidPackage;
+    link.href = `intent://${url.host}${url.pathname}${url.search}#Intent;scheme=https;package=${packageName};S.browser_fallback_url=${encodeURIComponent(fallback)};end`;
+  });
 }
 
-const snapCard = document.querySelector("#snapchat-card");
-const snapLabel = document.querySelector("#snap-label");
+configureMobileAppLinks();
+
 const toast = document.querySelector("#toast");
 
 let toastTimer = 0;
@@ -22,20 +29,6 @@ function showToast(message) {
   window.clearTimeout(toastTimer);
   toastTimer = window.setTimeout(() => toast.classList.remove("show"), 1900);
 }
-
-snapCard.addEventListener("click", async () => {
-  const username = snapCard.dataset.username;
-  try {
-    await navigator.clipboard.writeText(username);
-    snapLabel.textContent = `${username} · copié !`;
-    showToast("Identifiant copié");
-    window.setTimeout(() => {
-      snapLabel.textContent = `${username} · cliquer pour copier`;
-    }, 1800);
-  } catch {
-    window.location.href = `https://www.snapchat.com/add/${username}`;
-  }
-});
 
 const shareButton = document.querySelector("#share-button");
 const publicSiteUrl = "https://jecodelesoir.github.io/dark-aurelien-links/";
@@ -63,19 +56,11 @@ shareButton.addEventListener("click", async () => {
 function setTrack(track) {
   const isPlaying = track["@attr"]?.nowplaying === "true";
   const image = [...(track.image || [])].reverse().find((item) => item["#text"])?.["#text"];
-  const trackLink = document.querySelector("#track-link");
-
   document.querySelector("#track-name").textContent = track.name || "Titre inconnu";
   document.querySelector("#artist-name").textContent = track.artist?.["#text"] || "Artiste inconnu";
   document.querySelector("#spotify-note").textContent = isPlaying
     ? "Actualisé automatiquement toutes les 30 secondes via Last.fm."
     : "Dernier titre écouté · actualisé via Last.fm.";
-  trackLink.href = trustedExternalUrl(
-    track.url,
-    new Set(["www.last.fm", "last.fm"]),
-    spotifyProfile
-  );
-
   if (image) {
     const cover = document.createElement("img");
     cover.src = image;
