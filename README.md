@@ -1,6 +1,6 @@
 # al0.js — page de liens
 
-Page statique, responsive et sans backend, prête pour GitHub Pages.
+Page statique et responsive sur GitHub Pages, reliée à un Cloudflare Worker pour les fonctions qui nécessitent des secrets.
 
 ## Publier sur GitHub Pages
 
@@ -15,6 +15,7 @@ Spotify ne permet pas d’exposer publiquement l’écoute d’un compte depuis 
 
 1. Crée un compte Last.fm et relie Spotify depuis les paramètres Last.fm (scrobbling).
 2. Crée une clé API sur <https://www.last.fm/api/account/create>.
-3. Dans `config.js`, renseigne `lastfmUsername` et `lastfmApiKey`.
+3. Enregistre la clé côté Worker avec `npx wrangler secret put LASTFM_API_KEY`.
+4. Configure le nom public Last.fm dans `worker/wrangler.jsonc`, propriété `LASTFM_USERNAME`.
 
 La carte affiche alors le titre en cours, ou le dernier titre écouté, et se rafraîchit toutes les 30 secondes.

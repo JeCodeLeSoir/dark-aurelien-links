@@ -4,7 +4,8 @@
   "main": "src/index.js",
   "compatibility_date": "2026-11-09",
   "vars": {
-    "ALLOWED_ORIGINS": "http://127.0.0.1:8765,http://localhost:8765,https://jecodelesoir.github.io"
+    "ALLOWED_ORIGINS": "http://127.0.0.1:8765,http://localhost:8765,https://jecodelesoir.github.io",
+    "LASTFM_USERNAME": "aurelien97480"
   },
   "d1_databases": [
     {
@@ -21,9 +22,17 @@
         "limit": 1,
         "period": 60
       }
+    },
+    {
+      "name": "APP_RATE_LIMITER",
+      "namespace_id": "1002",
+      "simple": {
+        "limit": 30,
+        "period": 60
+      }
     }
   ],
   "secrets": {
-    "required": ["DISCORD_WEBHOOK_URL", "YOUTUBE_API_KEY", "TURNSTILE_SECRET_KEY", "VISITOR_HASH_SALT"]
+    "required": ["DISCORD_WEBHOOK_URL", "TURNSTILE_SECRET_KEY", "VISITOR_HASH_SALT", "APP_API_TOKEN", "LASTFM_API_KEY"]
   }
 }

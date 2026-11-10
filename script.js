@@ -1,5 +1,6 @@
 const spotifyProfile = "https://open.spotify.com/user/312d4xhikcxopuz43wpksnzkidtu?si=f4c9bb6df4f74379";
-const musicConfig = window.MUSIC_CONFIG || {};
+const workerEndpoint = "https://dark-aurelien-poke.dark-aurelien-poke-worker.workers.dev";
+const turnstileSiteKey = "0x4AAAAAAF5vf-vpEwp1qWvS";
 
 function trustedExternalUrl(value, allowedHosts, fallback) {
   try {
@@ -92,22 +93,11 @@ function setTrack(track) {
 }
 
 async function refreshLastFm() {
-  const { lastfmUsername, lastfmApiKey } = musicConfig;
-  if (!lastfmUsername || !lastfmApiKey) return;
-
-  const params = new URLSearchParams({
-    method: "user.getrecenttracks",
-    user: lastfmUsername,
-    api_key: lastfmApiKey,
-    format: "json",
-    limit: "1"
-  });
-
   try {
-    const response = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
+    const response = await fetch(`${workerEndpoint}/lastfm`, { cache: "no-store" });
     if (!response.ok) throw new Error("Réponse Last.fm invalide");
     const data = await response.json();
-    const track = data.recenttracks?.track?.[0];
+    const track = data.track;
     if (track) setTrack(track);
   } catch (error) {
     console.warn("Impossible d’actualiser Last.fm :", error);
@@ -129,7 +119,7 @@ let turnstileWidgetId = null;
 let turnstileToken = "";
 
 function initializeTurnstile(attempt = 0) {
-  const sitekey = window.POKE_CONFIG?.turnstileSiteKey?.trim();
+  const sitekey = turnstileSiteKey;
   if (!sitekey || sitekey === "TURNSTILE_SITE_KEY") {
     pokeButton.disabled = true;
     setPokeStatus("La protection anti-robot n’est pas encore configurée.", "error");
@@ -190,7 +180,7 @@ pokeForm.addEventListener("submit", async (event) => {
     setPokeStatus("Tu peux envoyer un poke par minute.", "error");
     return;
   }
-  const endpoint = window.POKE_CONFIG?.endpoint?.trim();
+  const endpoint = workerEndpoint;
   const formData = new FormData(pokeForm);
   const name = String(formData.get("name") || "").trim();
   const website = String(formData.get("website") || "");
@@ -332,7 +322,6 @@ if (finePointer.matches && profileTitle) {
 const visitorCount = document.querySelector("#visitor-count");
 
 async function loadVisitorCount() {
-  const workerEndpoint = window.POKE_CONFIG?.endpoint?.trim();
   if (!visitorCount || !workerEndpoint) return;
 
   try {
