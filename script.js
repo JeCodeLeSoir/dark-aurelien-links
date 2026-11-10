@@ -142,10 +142,11 @@ function initializeTurnstile(attempt = 0) {
     return;
   }
 
+  const turnstileSize = window.matchMedia("(max-width: 380px)").matches ? "compact" : "normal";
   turnstileWidgetId = window.turnstile.render("#turnstile-wrap", {
     sitekey,
     theme: "dark",
-    size: "flexible",
+    size: turnstileSize,
     callback(token) {
       turnstileToken = token;
       updatePokeCooldown();
