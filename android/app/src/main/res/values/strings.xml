@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Dark Aurélien Poke</string>
+    <string name="screen_title">Mes pokes</string>
+    <string name="screen_intro">Reçois les pokes de ton site, même quand cette fenêtre est fermée.</string>
+    <string name="token_label">Jeton privé du Worker</string>
+    <string name="token_hint">Colle le jeton ici</string>
+    <string name="token_help">Le jeton est chiffré sur ce téléphone et n’est jamais envoyé ailleurs que vers ton Worker.</string>
+    <string name="show_token">Afficher le jeton</string>
+    <string name="start">Activer les notifications</string>
+    <string name="stop">Arrêter</string>
+    <string name="status_inactive">Notifications inactives</string>
+    <string name="status_active">Notifications actives · vérification toutes les 30 secondes</string>
+    <string name="status_error">Notifications actives · %1$s</string>
+    <string name="token_required">Ajoute d’abord le jeton privé.</string>
+    <string name="notification_permission_required">Autorise les notifications pour voir les nouveaux pokes.</string>
+    <string name="monitor_channel">Surveillance des pokes</string>
+    <string name="poke_channel">Nouveaux pokes</string>
+    <string name="monitor_title">Pokes activés</string>
+    <string name="monitor_text">Vérification sécurisée en cours</string>
+    <string name="poke_title">Nouveau poke</string>
+    <string name="poke_text">%1$s vient de t’envoyer un poke</string>
+    <string name="history_title">Historique</string>
+    <string name="history_empty">Aucun poke reçu pour le moment.</string>
+    <string name="history_clear">Effacer l’historique</string>
+    <string name="history_clear_title">Effacer tous les pokes ?</string>
+    <string name="history_clear_message">Cette action supprimera définitivement l’historique enregistré sur ce téléphone.</string>
+    <string name="cancel">Annuler</string>
+    <string name="delete">Effacer</string>
+</resources>

@@ -1,0 +1,11 @@
+<resources>
+    <color name="bg">#080A0F</color>
+    <color name="surface">#121620</color>
+    <color name="surface_stroke">#343B4C</color>
+    <color name="text_primary">#F7F8FC</color>
+    <color name="text_secondary">#BFC7D8</color>
+    <color name="accent">#FFB21A</color>
+    <color name="accent_pressed">#E79700</color>
+    <color name="button_text">#171006</color>
+    <color name="danger">#FF6B77</color>
+</resources>
